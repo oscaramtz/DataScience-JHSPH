@@ -1,5 +1,7 @@
 #Assignment __Getting and Cleaning Data
 ## Keeping just the variables of interest mean() and std() variables
+library(tidyr)
+
 var_labels <- read.table("./data/UCI HAR Dataset/features.txt")
 kept <- c(rep("NULL", 561)); kept_var <- grep(var_labels[,2], pattern = "std[()]|mean[()]" ); kept[kept_var] <- "numeric"
 
@@ -11,6 +13,7 @@ kept <- c(rep("NULL", 561)); kept_var <- grep(var_labels[,2], pattern = "std[()]
 ### Setting up var names
       colnames(raw_set_train) <- var_labels[kept_var,2]
       colnames(raw_set_test) <- var_labels[kept_var,2]
+
 ## Combine the activities classification and subject ID
 activities_train <- read.table("./data/UCI HAR Dataset/train/y_train.txt", col.names = "activity.code")
 activities_test <- read.table("./data/UCI HAR Dataset/test/y_test.txt", col.names = "activity.code")
@@ -38,15 +41,8 @@ complete_set1 <- merge(activity_labels ,binded_set, by.x = "activity.code",by.y 
 
 
 ### Tidying the data.framee
-
-library(tidyr)
 complete_set <- complete_set1[,-1] ## Drop the unused column
 
-##analog method
-#df <- gather(complete_set, variables, value, -c(user.code, activity))
-#df_grouped <- group_by(df, activity, user.code, variables)
-#df_unspreaded <- df_grouped %>% summarize(avg_variables = mean(value))
-#df_summary <- spread(df_unspreaded, activity, avg_variables)
 
 df_summary <- complete_set %>%
   gather(variables, value, -c(user.code, activity)) %>%
@@ -54,9 +50,7 @@ df_summary <- complete_set %>%
   summarize(avg_variables = mean(value)) %>%
   spread(activity, avg_variables)
 
-group_indices(df_summary)
-group_size(df_summary)
-group_vars(df_summary)
+head(df_summary)
 
-grouped_df(df_summary, vars = "user.code")
-group
+write.table(df_summary, file = "Activity_Recognition_df_summary.txt", row.names = FALSE)
+
