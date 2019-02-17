@@ -1,5 +1,7 @@
 #Assignment __Getting and Cleaning Data
 ## Keeping just the variables of interest mean() and std() variables
+library(dplyr)
+library(tidyr)
 var_labels <- read.table("./data/UCI HAR Dataset/features.txt")
 kept <- c(rep("NULL", 561)); kept_var <- grep(var_labels[,2], pattern = "std[()]|mean[()]" ); kept[kept_var] <- "numeric"
 
