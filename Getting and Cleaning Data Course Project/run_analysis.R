@@ -1,5 +1,5 @@
 #Assignment __Getting and Cleaning Data
-## Keeping just the variables of interest mean() and std()
+## Keeping just the variables of interest mean() and std() variables
 var_labels <- read.table("./data/UCI HAR Dataset/features.txt")
 kept <- c(rep("NULL", 561)); kept_var <- grep(var_labels[,2], pattern = "std[()]|mean[()]" ); kept[kept_var] <- "numeric"
 
@@ -30,7 +30,7 @@ binded_set <- rbind(set_train, set_test)
 
 ## reading activities labels
 activity_labels <- read.table("./data/UCI HAR Dataset/activity_labels.txt", col.names = c("activity.code", "activity"))
-activity_labels$activity <- tolower(sub(activity_labels$activity, pattern = "_", replacement = " "))
+activity_labels$activity <- tolower(sub(activity_labels$activity, pattern = "_", replacement = ""))
 
 ## labeling activities
 complete_set1 <- merge(activity_labels ,binded_set, by.x = "activity.code",by.y = "activity.code")
@@ -55,6 +55,34 @@ df_summary <- complete_set %>%
   summarize(avg_variables = mean(value)) %>%
   spread(activity, avg_variables)
 
-df_summary
 
+# Class variable type
+df_summary$var.type <- "NULL"
+
+df_summary[grep(df_summary$variables, pattern = "^[f]"),"var.type"] <- "Frecuency"
+df_summary[grep(df_summary$variables, pattern = "^[t]"),"var.type"] <- "Time"
+
+
+
+# Class variable axis
+df_summary$axis <- "NULL"
+df_summary[grep(df_summary$variables, pattern = "[X]$"),"axis"] <- "X"
+df_summary[grep(df_summary$variables, pattern = "[Y]$"),"axis"] <- "Y"
+df_summary[grep(df_summary$variables, pattern = "[Z]$"),"axis"] <- "Z"
+
+## # Class variable measure
+df_summary$measure <- "NULL"
+df_summary[grep(df_summary$variables, pattern = "std[()]"),"measure"] <- "standard deviation"
+df_summary[grep(df_summary$variables, pattern = "mean[()]"),"measure"] <- "mean"
+
+##Cleaning variables var
+df_summary$variables <- sub(df_summary$variables, pattern = "^[ft]", replacement = "")
+df_summary$variables <- sub(df_summary$variables, pattern = "-mean|-std", replacement = "")
+df_summary$variables <- sub(df_summary$variables, pattern = "....$", replacement = "")
+
+#sorting variable order
+
+df_summary <- df_summary[, c(1,2,9,10,11,3:8)]
+
+##Writeing the dataframe
 write.table(df_summary, file = "Activity_Recognition_df_summary.txt", row.names = FALSE)
