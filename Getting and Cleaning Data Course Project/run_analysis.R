@@ -5,12 +5,12 @@ kept <- c(rep("NULL", 561)); kept_var <- grep(var_labels[,2], pattern = "std[()]
 
 
 ## Structuring the data frame and setting names for all variables
-  raw_set_train <- read.table("./data/UCI HAR Dataset/train/x_train.txt", colClasses = kept)
-  raw_set_test <- read.table("./data/UCI HAR Dataset/test/x_test.txt", colClasses = kept)
+raw_set_train <- read.table("./data/UCI HAR Dataset/train/x_train.txt", colClasses = kept)
+raw_set_test <- read.table("./data/UCI HAR Dataset/test/x_test.txt", colClasses = kept)
 
-  ### Setting up var names
-      colnames(raw_set_train) <- var_labels[kept_var,2]
-      colnames(raw_set_test) <- var_labels[kept_var,2]
+### Setting up var names
+colnames(raw_set_train) <- var_labels[kept_var,2]
+colnames(raw_set_test) <- var_labels[kept_var,2]
 
 ## Combine the activities classification and subject ID
 activities_train <- read.table("./data/UCI HAR Dataset/train/y_train.txt", col.names = "activity.code")
@@ -57,10 +57,10 @@ df_summary <- complete_set %>%
 
 
 # Class variable type
-df_summary$var.type <- "NULL"
+df_summary$domain <- "NULL"
 
-df_summary[grep(df_summary$variables, pattern = "^[f]"),"var.type"] <- "Frecuency"
-df_summary[grep(df_summary$variables, pattern = "^[t]"),"var.type"] <- "Time"
+df_summary[grep(df_summary$variables, pattern = "^[f]"),"domain"] <- "Frecuency"
+df_summary[grep(df_summary$variables, pattern = "^[t]"),"domain"] <- "Time"
 
 
 
@@ -69,6 +69,7 @@ df_summary$axis <- "NULL"
 df_summary[grep(df_summary$variables, pattern = "[X]$"),"axis"] <- "X"
 df_summary[grep(df_summary$variables, pattern = "[Y]$"),"axis"] <- "Y"
 df_summary[grep(df_summary$variables, pattern = "[Z]$"),"axis"] <- "Z"
+df_summary[df_summary$axis == "NULL","axis"] <- "Magnitude"
 
 ## # Class variable measure
 df_summary$measure <- "NULL"
@@ -79,7 +80,12 @@ df_summary[grep(df_summary$variables, pattern = "mean[()]"),"measure"] <- "mean"
 df_summary$variables <- sub(df_summary$variables, pattern = "^[ft]", replacement = "")
 df_summary$variables <- sub(df_summary$variables, pattern = "-mean|-std", replacement = "")
 df_summary$variables <- sub(df_summary$variables, pattern = "....$", replacement = "")
-
+df_summary$variables <- sub(df_summary$variables, pattern = "M$", replacement = "")
+df_summary$variables <- sub(df_summary$variables, pattern = "^BodyAcc$", replacement = "Body Acceleration")
+df_summary$variables <- sub(df_summary$variables, pattern = "^BodyAccJerk$", replacement = "Body Acceleration Jerk Sig")
+df_summary$variables <- sub(df_summary$variables, pattern = "^BodyGyro$", replacement = "Body Gyroscope")
+df_summary$variables <- sub(df_summary$variables, pattern = "^GravityAcc$", replacement = "Gravity Acceleration")
+df_summary$variables <- sub(df_summary$variables, pattern = "^BodyGyroJerk$", replacement = "Body Gyroscope Jerk sig")
 #sorting variable order
 
 df_summary <- df_summary[, c(1,2,9,10,11,3:8)]
