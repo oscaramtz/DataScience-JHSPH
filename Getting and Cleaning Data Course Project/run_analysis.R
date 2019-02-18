@@ -7,7 +7,6 @@ library(tidyr)
 var_labels <- read.table("./data/UCI HAR Dataset/features.txt")
 kept <- c(rep("NULL", 561)); kept_var <- grep(var_labels[,2], pattern = "std[()]|mean[()]" ); kept[kept_var] <- "numeric"
 
-
 ## Structuring the data frame and setting names for all variables
 raw_set_train <- read.table("./data/UCI HAR Dataset/train/x_train.txt", colClasses = kept)
 raw_set_test <- read.table("./data/UCI HAR Dataset/test/x_test.txt", colClasses = kept)
@@ -39,26 +38,26 @@ activity_labels$activity <- tolower(sub(activity_labels$activity, pattern = "_",
 ## labeling activities
 complete_set1 <- merge(activity_labels ,binded_set, by.x = "activity.code",by.y = "activity.code")
 
-
-
-
 ### Tidying the table_DataFrame summary
 
 library(tidyr)
 complete_set <- complete_set1[,-1] ## Drop the unused column
 
-##analog method
-#df <- gather(complete_set, variables, value, -c(user.code, activity))
-#df_grouped <- group_by(df, activity, user.code, variables)
-#df_unspreaded <- df_grouped %>% summarize(avg_variables = mean(value))
-#df_summary <- spread(df_unspreaded, activity, avg_variables)
-
+##summary the mean and standar deviation
 df_summary <- complete_set %>%
   gather(variables, value, -c(user.code, activity)) %>%
   group_by(activity, user.code, variables) %>%
   summarize(avg_variables = mean(value)) %>%
   spread(variables, avg_variables)
 
+## Cleaning column names
+names(df_summary) <- sub(names(df_summary), pattern = "^[ft]BodyAcc", replacement = "Body.Acceleration")
+names(df_summary) <- sub(names(df_summary), pattern = "^[ft]BodyAccJer$", replacement = "Body.Acceleration.Jerk.Sig")
+names(df_summary) <- sub(names(df_summary), pattern = "^[ft]BodyGyro", replacement = "Body.Gyroscope")
+names(df_summary) <- sub(names(df_summary), pattern = "^[ft]GravityAcc", replacement = "Gravity.Acceleration")
+names(df_summary) <- sub(names(df_summary), pattern = "^[ft]BodyGyroJerk", replacement = "Body.Gyroscope.Jerk.sig")
+names(df_summary) <- sub(names(df_summary), pattern = "[(]", replacement = "")
+names(df_summary) <- sub(names(df_summary), pattern = "[)]", replacement = "")
 
 ##Writeing the dataframe
 df_summary <- df_summary[, c(2,1,3:68)]
